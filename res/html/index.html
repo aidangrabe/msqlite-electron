@@ -58,20 +58,16 @@
 	}
 	
 	sqlQueryField.addEventListener('keydown', function(e) {
-		
-			console.log(e)
 		if (e.keyCode == 13 && e.metaKey) {
 			submitQuery()
 		}
 		if (e.keyCode == 38 && e.metaKey) {
 			currentHistoryIndex--
-			sqlQueryField.value = history[Math.abs(currentHistoryIndex) % history.length]
 		}
 		if (e.keyCode == 40 && e.metaKey) {
 			currentHistoryIndex++
-			sqlQueryField.value = history[Math.abs(currentHistoryIndex) % history.length]
 		}
-		console.log("currentHistoryIndex: " + currentHistoryIndex)
+		sqlQueryField.value = history[Math.abs(currentHistoryIndex) % history.length]
 	})
 	
   </script>
