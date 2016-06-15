@@ -1,0 +1,46 @@
+body {
+	background: white;
+	font-family: sans-serif;
+}
+.error {
+	background: #F44336;
+	color: #FFF;
+	margin: 16px 0;
+	padding: 8px;
+	border: 1px solid #C62828;
+	font-size: 14px;
+}
+#sql-query {
+	height: 90px;
+	width: 100%;
+	font-size: 16px;
+	font-family: monospace;
+}
+table {
+	border: 1px solid #CCC;
+	border-spacing: 0;
+	border-collapse: collapse;
+	font-size: 12px;
+	width: 100%;
+}
+table th {
+	background: #DDD;
+	padding: 6px;
+	text-align: left;
+}
+table tr {
+	border-bottom: 1px solid #DDD;
+}
+table tr:nth-child(2n) {
+	background: #EEE;
+}
+table td {
+	padding: 6px 4px;
+}
+.field {
+	border: 1px solid #CCC;
+	padding: 4px;
+}
+textarea {
+	border: none;
+}
