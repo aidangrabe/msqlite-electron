@@ -6,10 +6,26 @@
 	<link rel="stylesheet" type="text/css" href="../css/main.css" />
   </head>
   <body>
+
+  <nav id="nav">
+
+    <a href="#tables">Tables</a>
+    <a href="#query">Query</a>
+
+  </nav>
+
+  <div id="home-tab" class="tab">
+    <div id="tables"></div>
+    <div id="table-data"></div>
+  </div>
+
+  <div id="query-tab" class="tab">
     <input type="text" id="package-name-field" placeholder="Package Name" />
     <input type="text" id="database-name-field" placeholder="Database Name" />
-	<div class="field"><textarea id="sql-query" placeholder="CMD + Enter to query"></textarea></div>
-	<div id="sql-output"></div>
+    <div class="field"><textarea id="sql-query" placeholder="CMD + Enter to query"></textarea></div>
+    <div id="sql-output"></div>
+  </div>
+
 	<script src="../../src/main.js"></script>
   </body>
 </html>
