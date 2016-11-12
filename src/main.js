@@ -1,18 +1,14 @@
 // You can also require other files to run in this process
 const Prefs = require('../../src/Prefs.js')
-const exec = require('child_process').exec
+const QueryTab = require('../../src/QueryTab.js').QueryTab
+const Database = require('../../src/Database.js')
 const prefsFile = 'prefs.json'
 
-const sqlQueryField = document.getElementById('sql-query')
-const sqlOutput = document.getElementById('sql-output')
-const packageNameField = document.getElementById('package-name-field')
-const databaseNameField = document.getElementById('database-name-field')
+const homeTab = document.getElementById('home-tab')
+const queryTab = new QueryTab()
 
 const tablesDiv = document.getElementById('tables')
 const tablesData = document.getElementById('table-data')
-
-const homeTab = document.getElementById('home-tab')
-const queryTab = document.getElementById('query-tab')
 
 const nav = document.getElementById('nav')
 const navLinks = nav.querySelectorAll("a").forEach(function(it) {
@@ -26,17 +22,20 @@ const navLinks = nav.querySelectorAll("a").forEach(function(it) {
 const prefs = new Prefs.Preferences(prefsFile)
 const history = []
 let currentHistoryIndex = 0
+let database
 
 prefs.load(function() {
-	packageNameField.value = prefs.getProperty("package") || ""
-	databaseNameField.value = prefs.getProperty("database") || ""
+	const package = prefs.getProperty("package") || ""
+	const databaseName = prefs.getProperty("database") || ""
+
+	database = new Database.Database(package, databaseName)
 
 	switchTab("#tables")
 })
 
 function switchTab(tab) {
 	homeTab.style.display = 'none'
-	queryTab.style.display = 'none'
+	queryTab.hide()
 
 	const packageName = prefs.getProperty("package")
 	const databaseName = prefs.getProperty("database")
@@ -44,8 +43,11 @@ function switchTab(tab) {
 	if (tab === "#tables") {
 		homeTab.style.display = 'block'
 		const cmd = `adb exec-out "run-as ${packageName} sqlite3 -html -header databases/${databaseName} '.tables'"`
-		runSqliteCommand('.tables', function(error, stdout, stderr) {
+		database.runCommand('.tables', function(error, stdout, stderr) {
 			const output = stdout
+			if (output.length == 0) {
+				return
+			}
 			const tableNames = output.split(" ")
 				.map(function(it) {
 					return it.trim()
@@ -64,62 +66,16 @@ function switchTab(tab) {
 	}
 
 	if (tab === "#query") {
-		queryTab.style.display = 'block'
+		queryTab.show()
 	}
 }
-
-submitQuery = function() {
-	const packageName  = packageNameField.value
-	const databaseName = databaseNameField.value
-	const sqlQuery = sqlQueryField.value.replace(/\"|\'/g, '\\"')
-	
-	currentHistoryIndex = history.length
-	
-	if (packageName != prefs.getProperty("package") || databaseName != prefs.getProperty("database")) {
-		prefs.save()
-	}
-	
-	history.push(sqlQuery)
-	
-	runSqliteCommand(sqlQuery, function(error, stdout, stderr) {
-		if (stdout.length == 0) {
-			sqlOutput.innerHTML = "<div class='info'>No Rows</div>"
-		} else if (stdout.startsWith('Error: ')) {
-			sqlOutput.innerHTML = "<div class='error'>" + stdout + "</div>"
-		} else if (stdout.indexOf("<TD>") != -1) {
-			sqlOutput.innerHTML = "<table>" + stdout + "</table>"
-		} else {
-			sqlOutput.innerHTML = "<pre>" + stdout + "</pre>"
-		}
-	})
-}
-
-sqlQueryField.addEventListener('keydown', function(e) {
-	if (e.keyCode == 13 && e.metaKey) {
-		submitQuery()
-	}
-	
-	if (e.keyCode == 38 && e.metaKey) {
-		currentHistoryIndex--
-		sqlQueryField.value = history[Math.abs(currentHistoryIndex) % history.length]
-	}
-	if (e.keyCode == 40 && e.metaKey) {
-		currentHistoryIndex++
-		sqlQueryField.value = history[Math.abs(currentHistoryIndex) % history.length]
-	}
-})
 
 function showTable(tableName) {
 	const packageName = prefs.getProperty("package")
 	const databaseName = prefs.getProperty("database")
-	sqlQueryField.value = "SELECT * FROM " + tableName
-	switchTab("#query")
-	submitQuery()
-}
+	const sql = "SELECT * FROM " + tableName
 
-function runSqliteCommand(command, callback) {
-	const packageName = prefs.getProperty("package")
-	const databaseName = prefs.getProperty("database")
-	const cmd = `adb exec-out "run-as ${packageName} sqlite3 -html -header databases/${databaseName} '${command}'"`
-	exec(cmd, callback)
+	switchTab("#query")
+	queryTab.setSql(sql)
+	queryTab.submitQuery()
 }
